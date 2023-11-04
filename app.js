@@ -4,6 +4,15 @@ const morgan = require('morgan');
 const app = express();
 const tourRouter = require('./Routes/tourRoutes');
 const userRoutes = require('./Routes/userRoutes');
+const AppError = require('./utils/AppError');
+const globalErrorHandler = require('./controllers/errorControllers');
+
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'development') {
+  console.log('hello development');
+} else if (process.env.NODE_ENV === 'production') {
+  console.log('hello production');
+}
 // 1) MIDDLEWARE
 app.use(morgan('dev'));
 app.use(express.json());
@@ -31,5 +40,11 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/tours', tourRouter);
+
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this Server`, 404));
+});
+
+app.use(globalErrorHandler);
 //4) START SEREVER
 module.exports = app;
