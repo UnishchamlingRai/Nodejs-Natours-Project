@@ -1,28 +1,62 @@
 const express = require('express');
 const fs = require('fs');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 const app = express();
 const tourRouter = require('./Routes/tourRoutes');
 const userRoutes = require('./Routes/userRoutes');
 const AppError = require('./utils/AppError');
 const globalErrorHandler = require('./controllers/errorControllers');
 
+//Development loggin
 console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
   console.log('hello development');
 } else if (process.env.NODE_ENV === 'production') {
   console.log('hello production');
 }
-// 1) MIDDLEWARE
+// 1)GLOBAL MIDDLEWARE
+
+//Set Security HTTP headers
+app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json());
+//body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb' }));
+
+//Data sanitization against NoSQL query injectoin
+app.use(mongoSanitize());
+//Data sanitiztion against XSS
+app.use(xss());
+//prevents parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsAverage',
+      'ratingsQuantity',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
+
+//Serving static files
 app.use(express.static(`${__dirname}/public`));
 
-app.use((req, res, next) => {
-  console.log('hello From middlware');
-  next();
+//Limit request from same API
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many request from this IP, please try again in an hour!',
 });
+app.use('/api', limiter);
 
+//Test Middleware
 app.use((req, res, next) => {
   req.requestedTime = new Date().toISOString();
   next();

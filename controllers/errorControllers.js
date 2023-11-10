@@ -16,6 +16,13 @@ const handelValidationErrorDB = (error) => {
   return new AppError(message, 404);
 };
 
+const haldelJWTError = () => {
+  return new AppError('Invalid Token ! Please Log in Again', 401);
+};
+const haldelJWTExpiresError = () => {
+  return new AppError('Your Token has Expired! please Log in Again', 401);
+};
+
 const sendErrorForDevlopment = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -27,6 +34,7 @@ const sendErrorForDevlopment = (err, res) => {
 
 const sendErrorForProduction = (err, res) => {
   if (err.isOperational) {
+    // console.log(err);
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
@@ -47,12 +55,13 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    let error = { ...err };
-    console.log('error.name:', err.name);
+    // let error = { ...err };
+    // console.log('error.name:', err.name);
     sendErrorForDevlopment(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    console.log(err);
+    // console.log('Pro:', err.message);
     let error = { ...err };
+    // console.log('next:', error.message);
 
     if (err.name === 'CastError') {
       error = handelCastErrorDB(error);
@@ -62,6 +71,12 @@ module.exports = (err, req, res, next) => {
     }
     if (err.name === 'ValidationError') {
       error = handelValidationErrorDB(error);
+    }
+    if (err.name === 'JsonWebTokenError') {
+      error = haldelJWTError();
+    }
+    if (err.name === 'TokenExpiredError') {
+      error = haldelJWTExpiresError();
     }
 
     sendErrorForProduction(error, res);
