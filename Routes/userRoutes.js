@@ -7,18 +7,17 @@ router.post('/signup', authControllers.signup);
 router.post('/login', authControllers.login);
 router.post('/forgetPassword', authControllers.forgetPassword);
 router.patch('/resetPassword/:id', authControllers.resetPassword);
-router.patch(
-  '/updateMyPassword',
-  authControllers.protect,
-  authControllers.updateMyPassword
-);
-router.patch('/updateMe', authControllers.protect, usersControllers.updateMe);
-router.delete('/deleteMe', authControllers.protect, usersControllers.deleteMe);
 
-router
-  .route('/')
-  .get(usersControllers.getAllUsers)
-  .post(usersControllers.createUser);
+//Protect All routes After this Middleware
+router.use(authControllers.protect);
+router.patch('/updateMyPassword', authControllers.updateMyPassword);
+router.get('/me', usersControllers.getMe, usersControllers.getOneUser);
+router.patch('/updateMe', usersControllers.updateMe);
+router.delete('/deleteMe', usersControllers.deleteMe);
+
+//Restict All routes after this Middleware
+router.use(authControllers.restrictTo('admin'));
+router.route('/').get(usersControllers.getAllUsers);
 router
   .route('/:id')
   .get(usersControllers.getOneUser)
