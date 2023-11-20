@@ -1,0 +1,60 @@
+
+extends base
+mixin listItems(icon,text,link,active)
+  li(class=`${active?"side-nav--active":""}`)
+    a(href=`${link}`)
+      svg
+        use(xlink:href=`img/icons.svg#icon-${icon}`)
+      p= `${text}`
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          +listItems('settings','Settings','#',true)
+          +listItems('briefcase','My bookings','#')
+          +listItems('briefcase','My bookings','#')
+          +listItems('star','My reviews','#')
+          +listItems('credit-card','Billing','#')
+         
+        - if (user.role==='admin')
+          .admin-nav
+            h5.admin-nav__heading Admin
+            ul.side-nav
+              +listItems('map','Manage tours','#')
+              +listItems('users',' Manage users','#')
+              +listItems('star','Manage reviews','#')
+              +listItems('briefcase','','#')
+            
+      .user-view__content
+        .user-view__form-container
+          h2.heading-secondary.ma-bt-md Your account settings
+          //- form.form.form-user-data(action='/submit-user-data' method='POST')
+          form#updateUserForm.form.form-user-data
+            .form__group
+              label.form__label(for='name') Name
+              input#name.form__input(type='text', value=`${user.name}`, required,name='name')
+            .form__group.ma-bt-md
+              label.form__label(for='email') Email address
+              input#email.form__input(type='email', value=`${user.email}`, required,name='email')
+            .form__group.form__photo-upload
+              img.form__user-photo(src=`/img/users/${user.photo}`, alt=`Photo of ${user.name}`)
+              a.btn-text(href='') Choose new photo
+            .form__group.right
+              button.btn.btn--small.btn--green Save settings
+        .line &nbsp;
+        .user-view__form-container
+          h2.heading-secondary.ma-bt-md Password change
+          form#updatePassword.form.form-user-settings
+            .form__group
+              label.form__label(for='password-current') Current password
+              input#password-current.form__input(type='password', placeholder='••••••••', required, minlength='8')
+            .form__group
+              label.form__label(for='password') New password
+              input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
+            .form__group.ma-bt-lg
+              label.form__label(for='password-confirm') Confirm password
+              input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
+            .form__group.right
+              button.btn.btn--small.btn--green#savePassword Save password

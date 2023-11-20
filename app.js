@@ -1,4 +1,6 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
 const fs = require('fs');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -6,12 +8,18 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-const app = express();
+const cookieParser = require('cookie-parser');
+
+const viewRouter = require('./Routes/viewsRoutes');
 const tourRouter = require('./Routes/tourRoutes');
 const userRoutes = require('./Routes/userRoutes');
 const reviewRouter = require('./Routes/reviewRoutes');
 const AppError = require('./utils/AppError');
 const globalErrorHandler = require('./controllers/errorControllers');
+
+const app = express();
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 //Development loggin
 console.log(process.env.NODE_ENV);
@@ -21,12 +29,18 @@ if (process.env.NODE_ENV === 'development') {
   console.log('hello production');
 }
 // 1)GLOBAL MIDDLEWARE
-
+//Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(`${__dirname}/public`));
 //Set Security HTTP headers
 app.use(helmet());
 app.use(morgan('dev'));
 //body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
+// app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// app.use(bodyParser.urlencoded({ extended: true, limit: '10kb' }));
+// app.use(bodyParser.urle)
 
 //Data sanitization against NoSQL query injectoin
 app.use(mongoSanitize());
@@ -46,9 +60,6 @@ app.use(
   })
 );
 
-//Serving static files
-app.use(express.static(`${__dirname}/public`));
-
 //Limit request from same API
 const limiter = rateLimit({
   max: 100,
@@ -60,6 +71,7 @@ app.use('/api', limiter);
 //Test Middleware
 app.use((req, res, next) => {
   req.requestedTime = new Date().toISOString();
+  // console.log(req.cookies);
   next();
 });
 
@@ -73,6 +85,7 @@ app.use((req, res, next) => {
 
 //3)ROUTES
 
+app.use('/', viewRouter);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/reviews', reviewRouter);

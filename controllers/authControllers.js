@@ -69,6 +69,18 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 201, res);
 });
 
+//Log Out
+exports.logOut = (req, res) => {
+  res.cookie('jwt', 'logout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    status: 'success',
+  });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   //1) Getting token and chek of it's there
   let token;
@@ -77,6 +89,9 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+    // console.log('cookie:', req.cookies.jwt);
   }
 
   if (!token) {
@@ -104,10 +119,45 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   //GRANT ACCESS TO PROTECTED ROUTE
+  res.locals.user = currentUser;
   req.user = currentUser;
 
   next();
 });
+
+exports.isLogin = async (req, res, next) => {
+  //1) Getting token and chek of it's there
+  let token;
+  try {
+    if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+
+    if (!token) {
+      return next();
+    }
+    //2) Verification token
+    const verify = util.promisify(jwt.verify);
+    const decode = await verify(token, process.env.JWT_SECRET);
+
+    //3) check If user still exitsts
+    const currentUser = await User.findById(decode.id);
+    if (!currentUser) {
+      return next();
+    }
+    //4) Check if user changed password after the token was issued
+    if (currentUser.changePasswordAfterTokenIssued(decode.iat)) {
+      return next();
+    }
+    //the user is loged in so we sent user data to local
+    res.locals.user = currentUser;
+    // req.user = currentUser;
+
+    next();
+  } catch (error) {
+    return next();
+  }
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {

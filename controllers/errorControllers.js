@@ -23,30 +23,55 @@ const haldelJWTExpiresError = () => {
   return new AppError('Your Token has Expired! please Log in Again', 401);
 };
 
-const sendErrorForDevlopment = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    error: err,
-    stack: err.stack,
+const sendErrorForDevlopment = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      error: err,
+      stack: err.stack,
+    });
+  }
+
+  return res.status(err.statusCode).render('error', {
+    title: 'Error something went wrong',
+    msg: err.message,
   });
 };
 
-const sendErrorForProduction = (err, res) => {
+const sendErrorForProduction = (err, req, res) => {
+  //Operational Error
   if (err.isOperational) {
     // console.log(err);
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
+    //API
+    if (req.originalUrl.startsWith('/api')) {
+      console.log('ERROR:', err);
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+    // RENDER
+    return res.status(err.statusCode).render('error', {
+      title: 'Error something went wrong',
+      msg: err.message,
     });
-  } else {
-    //1) Log error
+  }
+
+  //1) Log error
+  // API
+  if (req.originalUrl.startsWith('/api')) {
     console.log('ERROR:', err);
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Something went Very wrong!',
     });
   }
+  //RENDER
+  return res.status(err.statusCode).render('error', {
+    title: 'Error something went wrong',
+    msg: 'SOMETHING WENT WORNG PLEASE TRY AGAIN LEATER !',
+  });
 };
 
 ///Global Error Handler// catch All Errors
@@ -57,10 +82,11 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     // let error = { ...err };
     // console.log('error.name:', err.name);
-    sendErrorForDevlopment(err, res);
+    sendErrorForDevlopment(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     // console.log('Pro:', err.message);
     let error = { ...err };
+    error.message = err.message;
     // console.log('next:', error.message);
 
     if (err.name === 'CastError') {
@@ -79,6 +105,6 @@ module.exports = (err, req, res, next) => {
       error = haldelJWTExpiresError();
     }
 
-    sendErrorForProduction(error, res);
+    sendErrorForProduction(error, req, res);
   }
 };
