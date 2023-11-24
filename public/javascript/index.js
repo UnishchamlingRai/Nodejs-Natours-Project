@@ -1,3 +1,41 @@
+// import {Axios} from 'axios'
+// import axios from "axios";
+
+document.addEventListener('DOMContentLoaded', function () {
+  const stripe = Stripe(
+    'pk_test_51OEv6yI3d5RBU90Bn3qqSyTLgQl2WwnbBU8dpO5wubukB9LlJxc7iF2YoBAmoUR8XaiIroMPWVQTLD9GUCKv0jsM00TTdGMfsT'
+  );
+  // Your other Stripe-related code here
+
+  const bookTour = async (tourId) => {
+    //1) Get checkout session from API
+    try {
+      let response = await fetch(
+        `http://127.0.0.1:3000/api/v1/booking/checkout-session/${tourId}`
+      );
+      response = await response.json();
+      console.log(response);
+      // console.log(response.session.id);
+      await stripe.redirectToCheckout({
+        sessionId: response.session.id,
+      });
+    } catch (error) {
+      console.log(error);
+      showAlert('error', error);
+    }
+    //2) Create checkout form + charge credit card
+  };
+
+  const selectBookTour = document.querySelector('#book-tour');
+  if (selectBookTour) {
+    selectBookTour.addEventListener('click', (event) => {
+      event.target.textContent = 'Processing...';
+      const tourId = event.target.dataset.tour;
+      bookTour(tourId);
+    });
+  }
+});
+
 //(Login)
 const login = async (email, password) => {
   try {
@@ -47,18 +85,11 @@ const logOut = async () => {
 };
 
 //update user data
-const updateUserData = async (name, email) => {
+const updateUserData = async (form) => {
   try {
-    const data = {
-      name: name,
-      email: email,
-    };
     let response = await fetch('http://127.0.0.1:3000/api/v1/users/updateMe', {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      body: form,
     });
     console.log('Reponse DAta:', response);
     response = await response.json();
@@ -138,10 +169,11 @@ if (selectUpdateUserForm) {
   selectUpdateUserForm.addEventListener('submit', (event) => {
     console.log('hello form gaihtj');
     event.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    console.log('Eamail an name:', name, email);
-    updateUserData(name, email);
+    const from = new FormData();
+    from.append('name', document.getElementById('name').value);
+    from.append('email', document.getElementById('email').value);
+    from.append('photo', document.getElementById('photo').files[0]);
+    updateUserData(from);
   });
 }
 

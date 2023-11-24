@@ -1,8 +1,8 @@
 extends base
 block append head
-  //- script(src='https://api.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js')
-  //- link(href='https://api.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet')
-  //- script(src='/javascript/mapbox.js')
+ 
+ 
+  
 //- Create a mixin in pug. which is just like a component in react or function in js. to reuse it
 mixin QuickFactsBox(icon,label,text)
   .overview-box__detail
@@ -89,4 +89,7 @@ block content
       .cta__content
         h2.heading-secondary What are you waiting for?
         p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
-        button.btn.btn--green.span-all-rows Book tour now!
+        if user
+          button.btn.btn--green.span-all-rows#book-tour(data-tour=`${tour.id}`) Book tour now!
+        else 
+          a.btn.btn--green.span-all-rows(href='/login') Log in to book tour

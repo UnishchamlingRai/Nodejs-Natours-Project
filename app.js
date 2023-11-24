@@ -9,15 +9,27 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+// const multer=require('multer')
 
 const viewRouter = require('./Routes/viewsRoutes');
 const tourRouter = require('./Routes/tourRoutes');
 const userRoutes = require('./Routes/userRoutes');
 const reviewRouter = require('./Routes/reviewRoutes');
+const bookingRoutes = require('./Routes/bookingRoutes');
 const AppError = require('./utils/AppError');
 const globalErrorHandler = require('./controllers/errorControllers');
 
 const app = express();
+// const upload=multer({dest:'/public/img/users'})
+
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "script-src 'self' https://js.stripe.com/; other-directives-here"
+  );
+  next();
+});
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -33,7 +45,12 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.static(`${__dirname}/public`));
 //Set Security HTTP headers
-app.use(helmet());
+// app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 app.use(morgan('dev'));
 //body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
@@ -89,6 +106,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/booking', bookingRoutes);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this Server`, 404));

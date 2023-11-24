@@ -1,6 +1,8 @@
 const express = require('express');
+
 const usersControllers = require('./../controllers/userControllers');
 const authControllers = require('./../controllers/authControllers');
+
 const router = express.Router();
 
 router.post('/signup', authControllers.signup);
@@ -13,7 +15,12 @@ router.patch('/resetPassword/:id', authControllers.resetPassword);
 router.use(authControllers.protect);
 router.patch('/updateMyPassword', authControllers.updateMyPassword);
 router.get('/me', usersControllers.getMe, usersControllers.getOneUser);
-router.patch('/updateMe', usersControllers.updateMe);
+router.patch(
+  '/updateMe',
+  usersControllers.uploadUserPhoto,
+  usersControllers.resizeUserPhoto,
+  usersControllers.updateMe
+);
 router.delete('/deleteMe', usersControllers.deleteMe);
 
 //Restict All routes after this Middleware

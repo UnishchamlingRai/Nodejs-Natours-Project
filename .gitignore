@@ -6,3 +6,5 @@ node_modules/
 
 # Ignore configuration files
 config.json/
+
+*.env

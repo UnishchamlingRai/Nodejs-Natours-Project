@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const catchAsync = require('../utils/catchAsyncError');
 const AppError = require('../utils/AppError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
+
 // const catchAsyncError = require('../utils/catchAsyncError');
 
 const generateJWTToken = (payload) => {
@@ -48,6 +49,9 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordChangeAt: req.body.passwordChangeAt,
     role: req.body.role,
   });
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  await new Email(newUser, url).sendWelcome();
+
   createSendToken(newUser, 201, res);
 });
 
@@ -189,14 +193,15 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   const resetUrl = `${req.protocol}://${req.get(
     'host'
   )}/api/v1/users/resetPassword/${resetToken}`;
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to:${resetUrl}.\n If you didn't forget your password, Please ignore this email!`;
+  // const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to:${resetUrl}.\n If you didn't forget your password, Please ignore this email!`;
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password rest token (Valid for 10 min)',
-      message,
-    });
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: 'Your password rest token (Valid for 10 min)',
+    //   message,
+    // });
+    await new Email(user, resetUrl).sendResetPassword();
     res.status(200).json({
       satus: 'Success',
       message: 'Token is Created',
