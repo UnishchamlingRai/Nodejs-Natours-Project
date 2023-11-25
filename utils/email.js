@@ -20,7 +20,7 @@ module.exports = class Email {
         },
       });
     }
-    console.log('hello from nodimaile Email');
+
     //1) Create A transporter
     return nodemailer.createTransport({
       host: process.env.MAILTRAP_HOST,
@@ -43,7 +43,7 @@ module.exports = class Email {
       }
     );
     // console.log('user:', this.email);
-    console.log('To:', this.to);
+
     // const text = htmlToText.fromString(html); //htmlToText
 
     //2) Define the email options

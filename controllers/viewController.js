@@ -18,7 +18,7 @@ exports.getOverview = catchAsync(async (req, res) => {
 
 exports.getTour = catchAsync(async (req, res, next) => {
   //1) Get the data, for the requested tour (including reviews and guides)
-  console.log(req.params);
+
   const tour = await Tour.findById(req.params.id).populate({ path: 'reviews' });
   if (!tour) {
     return next(new AppError('There is no Tour with that ID:', 404));
@@ -46,7 +46,6 @@ exports.myAccount = (req, res) => {
 };
 
 exports.updateUserData = catchAsync(async (req, res) => {
-  console.log('body Data:', req.body);
   const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     {

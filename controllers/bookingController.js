@@ -8,7 +8,7 @@ const AppError = require('../utils/AppError');
 const haldlerFactory = require('./handlerFactory');
 
 exports.bookingSessionStorage = catchAsync(async (req, res, next) => {
-  console.log(req.params.tourId);
+  // console.log(req.params.tourId);
   //1) Get the currency booked tour
   const tour = await Tour.findById(req.params.tourId);
 
@@ -44,7 +44,6 @@ exports.bookingSessionStorage = catchAsync(async (req, res, next) => {
 });
 
 exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-  console.log('hello Booking...');
   // This is only TEMPORARY, because it is UNSECURE: everyone can make booking without paying
   if (!req.query.tourId && !req.query.price && !req.query.user) {
     return next();
@@ -54,7 +53,7 @@ exports.createBookingCheckout = catchAsync(async (req, res, next) => {
     user: req.query.user,
     price: req.query.price,
   });
-  console.log(bookingTour);
+
   res.redirect(req.originalUrl.split('?')[0]);
 });
 

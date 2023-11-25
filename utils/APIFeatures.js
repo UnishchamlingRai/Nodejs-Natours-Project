@@ -34,7 +34,7 @@ class APIFeatures {
   fieldsLimit() {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',').join(' ');
-      console.log('Fields:', fields);
+
       this.query = this.query.select(fields); //select(name price difficulty)
     } else {
       this.query = this.query.select('-__v');

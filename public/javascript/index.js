@@ -10,9 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const bookTour = async (tourId) => {
     //1) Get checkout session from API
     try {
-      let response = await fetch(
-        `http://127.0.0.1:3000/api/v1/booking/checkout-session/${tourId}`
-      );
+      let response = await fetch(`/api/v1/booking/checkout-session/${tourId}`);
       response = await response.json();
       console.log(response);
       // console.log(response.session.id);
@@ -43,7 +41,7 @@ const login = async (email, password) => {
       email: email,
       password: password,
     };
-    const url = 'http://127.0.0.1:3000/api/v1/users/login';
+    const url = '/api/v1/users/login';
     let response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -67,7 +65,7 @@ const login = async (email, password) => {
 
 //To current user logout
 const logOut = async () => {
-  let response = await fetch('http://127.0.0.1:3000/api/v1/users/logOut');
+  let response = await fetch('/api/v1/users/logOut');
   response = await response.json();
   try {
     if (response.status === 'success') {
@@ -87,13 +85,13 @@ const logOut = async () => {
 //update user data
 const updateUserData = async (form) => {
   try {
-    let response = await fetch('http://127.0.0.1:3000/api/v1/users/updateMe', {
+    let response = await fetch('/api/v1/users/updateMe', {
       method: 'PATCH',
       body: form,
     });
-    console.log('Reponse DAta:', response);
+
     response = await response.json();
-    console.log('Reponse DAta:', response);
+
     if (response.status === 'success') {
       showAlert('success', 'User Data Update Successfully');
       window.location.reload(true);
@@ -118,22 +116,18 @@ const updateUserPassword = async (
       password: password,
       passwordConfirm: passwordConfirm,
     };
-    let response = await fetch(
-      'http://127.0.0.1:3000/api/v1/users/updateMyPassword',
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    let response = await fetch('/api/v1/users/updateMyPassword', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
     response = await response.json();
     if (response.status === 'Success') {
       showAlert('success', 'User Password Update Successfully');
       // window.location.reload(true);
     } else {
-      console.log('error:', response);
       showAlert('error', response.message);
     }
   } catch (error) {
@@ -167,7 +161,6 @@ if (selectLouOut) {
 }
 if (selectUpdateUserForm) {
   selectUpdateUserForm.addEventListener('submit', (event) => {
-    console.log('hello form gaihtj');
     event.preventDefault();
     const from = new FormData();
     from.append('name', document.getElementById('name').value);

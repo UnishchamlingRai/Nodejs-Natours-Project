@@ -9,6 +9,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 // const multer=require('multer')
 
 const viewRouter = require('./Routes/viewsRoutes');
@@ -84,7 +85,7 @@ const limiter = rateLimit({
   message: 'Too many request from this IP, please try again in an hour!',
 });
 app.use('/api', limiter);
-
+app.use(compression());
 //Test Middleware
 app.use((req, res, next) => {
   req.requestedTime = new Date().toISOString();

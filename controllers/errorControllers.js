@@ -12,7 +12,7 @@ const handelDuplicateErrorDB = (error) => {
 const handelValidationErrorDB = (error) => {
   const errors = Object.values(error.errors).map((el) => el.message);
   const message = `Invalid Input Data. ${errors.join('. ')}`;
-  console.log('message:', message);
+
   return new AppError(message, 404);
 };
 
