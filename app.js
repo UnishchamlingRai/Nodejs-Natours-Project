@@ -10,6 +10,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 // const multer=require('multer')
 
 const viewRouter = require('./Routes/viewsRoutes');
@@ -42,6 +43,10 @@ if (process.env.NODE_ENV === 'development') {
   console.log('hello production');
 }
 // 1)GLOBAL MIDDLEWARE
+// implimenting corse
+app.use(cors()); //Access-Control-Allow-Origin
+app.options('*', cors());
+// app.options('/api/v1/tours/:id',cors())
 //Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.static(`${__dirname}/public`));
