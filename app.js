@@ -44,7 +44,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 // 1)GLOBAL MIDDLEWARE
 // implimenting corse
-app.use(cors()); //Access-Control-Allow-Origin
+// app.use(cors()); //Access-Control-Allow-Origin
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.options('*', cors());
 // app.options('/api/v1/tours/:id',cors())
 //Serving static files
